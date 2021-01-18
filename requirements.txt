@@ -4,3 +4,4 @@ pandas
 matplotlib
 tensorflow
 scikit-learn
+tabulate
