@@ -5,6 +5,12 @@ print("=" * 70)
 settings["validation"] = input("Choose validation size in % (default = '20'): ")
 print("=" * 70 + "\n")
 
+print("=" * 70)
+settings["dim"] = input("Resize all images to a specific size. Type e.g. '64 32' for 64px width and 32x height"
+                        "(Note: If left blank all images will be resized to the shape of the first image in "
+                        "the training folder): ")
+print("=" * 70 + "\n")
+
 
 print("=" * 70 + "\n[1]: Normalize the pixel values between 0 and 1 (can increase training accuracy)\n"
                         "[2]: Don't normalize. Pixel values will be between 0 and 255")

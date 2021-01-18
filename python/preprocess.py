@@ -12,20 +12,30 @@ class Preprocess():
 
 
     # ============================================================
-    def load_data(self, validation):
+    def load_data(self, validation, dimx, dimy):
         count = 0
         images, categories = [], []
-        data = os.listdir(self.path_data)
 
-        for x in range(len(data)):
-            folder = os.listdir(self.path_data + "/" + str(count))
-            for file in folder:
-                image = cv2.imread(self.path_data + "/" + str(count) + "/" + file)
+        if os.path.exists(self.path_data + "/Insert your training data in this directory.txt"):
+            os.remove(self.path_data + "/Insert your training data in this directory.txt")
+        data = os.listdir(self.path_data)
+        data.sort()
+
+        for folder in data:
+            f = os.listdir(self.path_data + "/" + folder)
+            for file in f:
+                image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                image = cv2.resize(image, (dimx, dimy))
                 images.append(image)
-                categories.append(count)
+                try:
+                    categories.append(int(folder))
+                except:
+                    print("\n\nERROR: The folder name '{}' is not an Integer!".format(folder))
+                    sys.exit(1)
+
             count += 1
-            # print("Loaded folder {}/{}".format(count, len(data)), end='\r')
             sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
+
 
         # --- split trainingData into train and validation ---
         x_train, x_val, y_train, y_val = train_test_split(images, categories, test_size=validation)
@@ -70,9 +80,25 @@ class Preprocess():
         else:
             validation = int(settings["validation"]) / 100
         img_normalize = settings["normalize"]
-        x_train, x_val, y_train, y_val = self.load_data(validation)
+
+        if settings["dim"] == "":
+            folder = os.listdir(self.path_data + "/0")
+            for file in folder:
+                if file.endswith(".txt"):
+                    continue
+                image = cv2.imread(self.path_data + "/0/" + file)
+                dimx = image.shape[0]
+                dimy = image.shape[1]
+                print("Automatically detected shape of {}x{} pixel for training images".format(dimx, dimy))
+                break
+
+        else:
+            dimx = int(settings["dim"].split(' ')[0])
+            dimy = int(settings["dim"].split(' ')[1])
+
+        x_train, x_val, y_train, y_val = self.load_data(validation, dimx, dimy)
         x_train, x_val, y_train, y_val = self.preprocess_data(x_train, x_val, y_train, y_val, img_normalize)
 
         mode = settings["mode"]
         model = Model(mode)
-        model.train_model(x_train, x_val, y_train, y_val, settings)
+        model.train_model(x_train, x_val, y_train, y_val, dimx, dimy, settings)
