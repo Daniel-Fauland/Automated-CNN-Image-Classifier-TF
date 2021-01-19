@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from tensorflow import keras
+import time
 from tensorflow.keras import layers, models
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ class Model():
     def __init__(self, mode):
         self.checkpoint_dir = "./checkpoints"
 
-        if mode == "2":
+        if mode == "2" or mode == "3":
             # --- prevent TF from using more VRAM than the GPU actually has ---
             gpus = tf.config.experimental.list_physical_devices('GPU')
             if gpus:
@@ -19,12 +19,12 @@ class Model():
                         tf.config.experimental.set_memory_growth(gpu, True)
                 except RuntimeError as e:
                     print(e)
-        elif mode == "3":
+        elif mode == "4":
             os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # force CPU Usage, instead of GPU
 
 
     # ============================================================
-    def model(self, dimx, dimy, x_train, x_val, y_train, y_val, epochs, batch_size):
+    def model(self, dimx, dimy, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
         model = models.Sequential()
         model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(dimx, dimy, 1)))
         model.add(layers.MaxPooling2D((2, 2)))
@@ -34,7 +34,7 @@ class Model():
         model.add(layers.Dropout(0.2))
         model.add(layers.Dense(64, activation='relu'))
         model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(43))
+        model.add(layers.Dense(dim_out))
 
         model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics=['accuracy'])
@@ -46,16 +46,24 @@ class Model():
 
 
     # ============================================================
-    def results(self, history):
+    def results(self, history, s_time):
         acc = str(round(max(history.history["val_accuracy"]) * 100, 2))
         epoch_acc = str(history.history["val_accuracy"].index(max(history.history["val_accuracy"])) + 1)
-        loss = str(round(min(history.history["val_loss"]), 3))
+        loss = str(round(min(history.history["val_loss"]), 4))
         epoch_loss = str(history.history["val_loss"].index(min(history.history["val_loss"])) + 1)
 
-        print("\n======================================================================")
-        print("The highest acc. ({}%) on the validation data was achieved in epoch {}".format(acc, epoch_acc))
+        end_time = time.time()
+        duration = end_time - s_time
+        if duration <= 60:
+            duration = "The total runtime was {} seconds".format(round(duration, 2))
+        else:
+            duration = "The total runtime was {} minutes".format(round(duration/ 60, 2))
+
+        print("\n=======================================================================")
+        print("The highest acc ({}%) on the validation data was achieved in epoch {}".format(acc, epoch_acc))
         print("The lowest loss ({}) on the validation data was achieved in epoch {}".format(loss, epoch_loss))
-        print("======================================================================")
+        print(duration)
+        print("=======================================================================")
 
         # --- plot a graph showing the accuracy over the epochs
         plt.plot(history.history['accuracy'], label='accuracy')
@@ -67,7 +75,9 @@ class Model():
         plt.show()
 
 
-    def train_model(self, x_train, x_val, y_train, y_val, dimx, dimy, settings):
+    # ============================================================
+    def train_model(self, x_train, x_val, y_train, y_val, dimx, dimy, dim_out, settings):
+        s_time = settings["s_time"]
         if settings["epochs"] == "":
             epochs = 10
         else:
@@ -78,5 +88,5 @@ class Model():
         else:
             batch_size = int(settings["batch_size"])
 
-        history, model, x_val, y_val = self.model(dimx, dimy, x_train, x_val, y_train, y_val, epochs, batch_size)
-        self.results(history)
+        history, model, x_val, y_val = self.model(dimx, dimy, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
+        self.results(history, s_time)
