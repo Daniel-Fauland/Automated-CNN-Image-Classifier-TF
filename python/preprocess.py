@@ -47,10 +47,15 @@ class Preprocess():
 
 
     # ============================================================
-    def preprocess_data(self, x_train, x_val, y_train, y_val, img_normalize):
-        def normalize(img, img_normalize):
-            img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
+    def preprocess_data(self, x_train, x_val, y_train, y_val, img_normalize, channels):
+        def normalize(img, img_normalize, channels):
+            if channels == 3:
+                pass
+            else:
+                img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
+
             # img = cv2.equalizeHist(np.uint8(img))                  # Optimize Lightning
+
             if img_normalize == "2":
                 pass
             else:
@@ -59,18 +64,18 @@ class Preprocess():
 
 
         for x in range(len(x_train)):
-            x_train[x] = normalize(x_train[x], img_normalize)
+            x_train[x] = normalize(x_train[x], img_normalize, channels)
 
         for x in range(len(x_val)):
-            x_val[x] = normalize(x_val[x], img_normalize)
+            x_val[x] = normalize(x_val[x], img_normalize, channels)
 
         # --- transform the data to be accepted by the model ---
         y_train = np.array(y_train)
         y_val = np.array(y_val)
         x_train = np.array(x_train)
         x_val = np.array(x_val)
-        x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1)
-        x_val = x_val.reshape(x_val.shape[0], x_val.shape[1], x_val.shape[2], 1)
+        x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], channels)
+        x_val = x_val.reshape(x_val.shape[0], x_val.shape[1], x_val.shape[2], channels)
         print("Preprocessing training data complete.")
         return x_train, x_val, y_train, y_val
 
@@ -82,7 +87,6 @@ class Preprocess():
             validation = 0.2
         else:
             validation = int(settings["validation"]) / 100
-        img_normalize = settings["normalize"]
 
         if settings["dim"] == "":
             data = os.listdir(self.path_data)
@@ -101,11 +105,17 @@ class Preprocess():
             dimx = int(settings["dim"].split(' ')[0])
             dimy = int(settings["dim"].split(' ')[1])
 
+        if settings["channels"] == "2":
+            channels = 3
+        else:
+            channels = 1
+        img_normalize = settings["normalize"]
+
         x_train, x_val, y_train, y_val, dim_out = self.load_data(validation, dimx, dimy)
-        x_train, x_val, y_train, y_val = self.preprocess_data(x_train, x_val, y_train, y_val, img_normalize)
+        x_train, x_val, y_train, y_val = self.preprocess_data(x_train, x_val, y_train, y_val, img_normalize, channels)
 
         df = {"dimx": [dimx], "dimy": [dimy], "csv_name": [settings["csv_name"]], "csv_column": [settings["csv_column"]],
-              "img_normalize": [img_normalize], "mode": [settings["mode"]]}
+              "img_normalize": [img_normalize], "channels": [channels], "mode": [settings["mode"]]}
         df = pd.DataFrame(df)
         df.to_csv("python/predict_params.csv")
         mode = settings["mode"]

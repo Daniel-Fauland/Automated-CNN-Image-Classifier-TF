@@ -24,9 +24,9 @@ class Model():
 
 
     # ============================================================
-    def model(self, dimx, dimy, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
+    def model(self, dimx, dimy, channels, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
         model = models.Sequential()
-        model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(dimx, dimy, 1)))
+        model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(dimx, dimy, channels)))
         model.add(layers.MaxPooling2D((2, 2)))
         model.add(layers.Conv2D(64, (3, 3), activation='relu'))
 
@@ -88,5 +88,10 @@ class Model():
         else:
             batch_size = int(settings["batch_size"])
 
-        history, model, x_val, y_val = self.model(dimx, dimy, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
+        if settings["channels"] == "2":
+            channels = 3
+        else:
+            channels = 1
+
+        history, model, x_val, y_val = self.model(dimx, dimy, channels, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
         self.results(history, s_time)

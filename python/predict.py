@@ -36,21 +36,28 @@ class Predict():
 
     # ============================================================
     def preprocess_data(self, images):
-        def normalize(img, img_normalize):
-            img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
+        def normalize(img, img_normalize, channels):
+            if channels == 3:
+                pass
+            else:
+                img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
+
             # img = cv2.equalizeHist(np.uint8(img))                  # Optimize Lightning
+
             if img_normalize == "2":
                 pass
             else:
                 img = img / 255.0  # Normalize px values between 0 and 1
             return img
 
-        img_normalize = self.df["img_normalize"][0]
+        img_normalize = str(self.df["img_normalize"][0])
+        channels = self.df["channels"][0]
+
         for x in range(len(images)):
-            images[x] = normalize(images[x], img_normalize)
+            images[x] = normalize(images[x], img_normalize, channels)
 
         images = np.array(images)
-        images = images.reshape(images.shape[0], images.shape[1], images.shape[2], 1)
+        images = images.reshape(images.shape[0], images.shape[1], images.shape[2], channels)
         return images
 
 

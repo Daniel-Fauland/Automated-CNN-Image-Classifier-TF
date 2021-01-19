@@ -19,17 +19,15 @@ class Labels():
             file = files[0]
 
         elif len(files) > 1:
-            print("=" * 70)
             for n, i in enumerate(files):
                 print("[{}]: {}".format(n+1, i))
-            print("=" * 70)
             inp = int(input("There are multiple files in this directory. "
                             "(Choose file with number between '1' and '{}'): ".format(len(files))))
             file = files[inp-1]
 
         else:
-            print("=" * 70 + "\n[1]: Create label file yourself\n"
-                           "[2]: Exit program\n" + "=" * 70)
+            print("[1]: Create label file yourself\n"
+                           "[2]: Exit program")
             inp = input(("No labels file found in this directory. Type either '1' or '2' (default = '1'): "))
             if inp == "2":
                 sys.exit(1)
@@ -75,7 +73,7 @@ class Labels():
         df = {"label": labels, "folder_name": data}
         df = pd.DataFrame(df)
         print("\n" + tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-        print("\n" + "=" * 70 + "\n[1]: Labels are correct. Continue with training\n[2]: Exit program\n" + "=" * 70)
+        print("\n[1]: Labels are correct. Continue with training\n[2]: Exit program")
         inp = input("Choose option '1' or '2' (default: '1'): ")
         if inp == "2":
             sys.exit(1)
