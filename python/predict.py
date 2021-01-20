@@ -1,10 +1,10 @@
 import os
+import sys
 import cv2
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from tabulate import tabulate
 
 
 class Predict():
@@ -25,12 +25,19 @@ class Predict():
         src_images = []
         data = os.listdir(self.path_data)
         for file in data:
-            image = cv2.imread(self.path_data + "/" + file)
-            src_img = plt.imread(self.path_data + "/" + file)
-            image = cv2.resize(image, (dimx, dimy))
-            images.append(image)
-            src_images.append(src_img)
-        print("read images succesful.")
+            try:
+                image = cv2.imread(self.path_data + "/" + file)
+                src_img = plt.imread(self.path_data + "/" + file)
+                image = cv2.resize(image, (dimx, dimy))
+                images.append(image)
+                src_images.append(src_img)
+            except:
+                print("=" * 100)
+                print("ERROR! OpenCV could not open the file '{}'\n"
+                      "This is probably due to an invalid character in the file name\nRename "
+                      "the file and try again.".format(file))
+                print("=" * 100)
+                sys.exit(1)
         return images, src_images
 
 

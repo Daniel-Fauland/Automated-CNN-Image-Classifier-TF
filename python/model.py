@@ -1,8 +1,8 @@
 import os
+import sys
 import tensorflow as tf
 import time
 from tensorflow.keras import layers, models
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -24,36 +24,53 @@ class Model():
 
 
     # ============================================================
-    def model(self, dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size):
+    def model(self, dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1,
+              dropout_2, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val,
+              epochs, batch_size):
+        # ---Model configuration---
         model = models.Sequential()
         model.add(layers.Conv2D(num_n[0], strides_n[0], activation=activation[0], input_shape=(dimx, dimy, channels)))
-        model.add(layers.MaxPooling2D(m_pool[0]))
+        if pool_layers[0] == "y":
+            model.add(layers.MaxPooling2D(m_pool[0]))
+            pool = 0
+        else:
+            pool = -1
 
-        pool = 0
-        for i in range(num_l-1):
-            model.add(layers.Conv2D(num_n[i+1], strides_n[i+1], activation=activation[i+1]))
-            if pool_layers[i+1] == "y":
-                pool += 1
-                model.add(layers.MaxPooling2D(m_pool[pool]))
-        #
-        model.add(layers.Flatten())
-        if dropout_1 != 0:
-            model.add(layers.Dropout(dropout_1))
+        try:
+            for i in range(num_l-1):
+                model.add(layers.Conv2D(num_n[i+1], strides_n[i+1], activation=activation[i+1]))
+                if pool_layers[i+1] == "y":
+                    pool += 1
+                    model.add(layers.MaxPooling2D(m_pool[pool]))
 
-        for i in range(num_hidden_l):
-            model.add(layers.Dense(num_hidden_n[i], activation=hidden_activation[i]))
-        # model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(dim_out))
+            model.add(layers.Flatten())
+            if dropout_1 != 0:
+                model.add(layers.Dropout(dropout_1))
 
-        with open('python/model_summary.txt', 'w') as ms:
-            model.summary(print_fn=lambda x: ms.write(x + '\n'))
+            for i in range(num_hidden_l):
+                model.add(layers.Dense(num_hidden_n[i], activation=hidden_activation[i]))
 
-        model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                      metrics=['accuracy'])
+            if dropout_2 != 0:
+                model.add(layers.Dropout(dropout_2))
+
+            model.add(layers.Dense(dim_out))  # Num neurons in last layer will always depend on the number of your categorizes
+            # ---End of model configuration---
+
+            with open('python/model_summary.txt', 'w') as ms:
+                model.summary(print_fn=lambda x: ms.write(x + '\n'))
+
+                model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                              metrics=['accuracy'])
+        except:
+            print("="*100)
+            print("ERROR! You used to many 'Conv2D' and/or 'MaxPooling' layer which led to a negative output shape.\nTry to reduce the amount "
+                  "of 'Conv2D' and/or 'MaxPooling' layers.")
+            print("="*100)
+            sys.exit(1)
+
         history = model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size,
                             validation_data=(x_val, y_val))
         model.save(self.checkpoint_dir + "/model.h5")
-        print("training model done.")
         return history, model, x_val, y_val
 
 
@@ -71,19 +88,28 @@ class Model():
         else:
             duration = "The total runtime was {} minutes".format(round(duration/ 60, 2))
 
-        print("\n=======================================================================")
+        print("\n========================================================================")
         print("The highest acc ({}%) on the validation data was achieved in epoch {}".format(acc, epoch_acc))
         print("The lowest loss ({}) on the validation data was achieved in epoch {}".format(loss, epoch_loss))
         print(duration)
-        print("=======================================================================")
+        print("========================================================================")
 
-        # --- plot a graph showing the accuracy over the epochs
+        # --- plot a graph showing the accuracy over the epochs ---
         plt.plot(history.history['accuracy'], label='accuracy')
         plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
         plt.xlabel('Epochs')
         plt.ylabel('Accuracy')
-        plt.ylim([0.5, 1])
+        plt.ylim([0, 1])
         plt.legend(loc='lower right')
+        plt.show()
+
+        # --- plot a graph showing the loss over the epochs ---
+        plt.plot(history.history['loss'], label='loss')
+        plt.plot(history.history['val_loss'], label='val_loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.ylim([0, 1])
+        plt.legend(loc='upper right')
         plt.show()
 
 
@@ -113,8 +139,6 @@ class Model():
         num_l = settings["count_layers"]
         pool = 0
         pool_layers = settings["pooling_layers"]
-        print("num_l", num_l)
-        print("pool_layers", pool_layers)
         for i in range(num_l):
             if i == 0:
                 if settings["num_neurons_" + str(i+1)] == "":
@@ -168,8 +192,15 @@ class Model():
             else:
                 dropout_1 = int(settings["dropout_1"]) / 100
         except:
-            print("dropout_1 does not exist. The value will be 0 now")
             dropout_1 = 0
+
+        try:
+            if settings["dropout_2"] == "":
+                dropout_2 = 0.25
+            else:
+                dropout_2 = int(settings["dropout_2"]) / 100
+        except:
+            dropout_2 = 0
 
         num_hidden_n = []
         hidden_activation = []
@@ -199,5 +230,5 @@ class Model():
             else:
                 hidden_activation.append("relu")
 
-        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size)
+        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, dropout_2, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size)
         self.results(history, s_time)

@@ -54,7 +54,7 @@ class Preprocess():
             else:
                 img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
 
-            # img = cv2.equalizeHist(np.uint8(img))                  # Optimize Lightning
+            # img = cv2.equalizeHist(np.uint8(img))                  # Optimize Contrast
 
             if img_normalize == "2":
                 pass

@@ -19,13 +19,21 @@ class Labels():
             file = files[0]
 
         elif len(files) > 1:
+            option = " label options "
+            print("*" * 30 + option + "*" * 30)
             for n, i in enumerate(files):
-                print("[{}]: {}".format(n+1, i))
+                print("[{}]: '{}'".format(n+1, i))
+            print("[{}]: Create label file yourself".format(len(files)+1))
             inp = int(input("There are multiple files in this directory. "
-                            "(Choose file with number between '1' and '{}'): ".format(len(files))))
+                            "(Choose file with number between '1' and '{}'): ".format(len(files)+1)))
+            if inp == len(files)+1:
+                file, column_name = self.create_labels()
+                return file, column_name
             file = files[inp-1]
 
         else:
+            option = " label options "
+            print("*" * 30 + option + "*" * 30)
             print("[1]: Create label file yourself\n"
                            "[2]: Exit program")
             inp = input(("No labels file found in this directory. Type either '1' or '2' (default = '1'): "))
@@ -41,8 +49,7 @@ class Labels():
 
         df = pd.read_csv(self.labels_path + "/" + file)
         print("\n" + tabulate(df[:3], headers='keys', tablefmt='psql', showindex=False))
-        inp = int(input(
-            "Choose the column with the label names (Type number between '1' and '{}'): ".format(df.shape[1])))
+        inp = int(input("Choose the column with the label names (Type number between '1' and '{}'): ".format(df.shape[1])))
         col = list(df.columns)
         column_name = col[inp-1]
         return file, column_name
