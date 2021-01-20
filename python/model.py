@@ -24,17 +24,20 @@ class Model():
 
 
     # ============================================================
-    def model(self, dimx, dimy, channels, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
+    def model(self, dimx, dimy, channels, num_n_1, strides_n_1, m_pool_1, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
         model = models.Sequential()
-        model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(dimx, dimy, channels)))
-        model.add(layers.MaxPooling2D((2, 2)))
+        model.add(layers.Conv2D(num_n_1, strides_n_1, activation='relu', input_shape=(dimx, dimy, channels)))
+        model.add(layers.MaxPooling2D(m_pool_1))
         model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-
+        #
         model.add(layers.Flatten())
-        model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(64, activation='relu'))
-        model.add(layers.Dropout(0.2))
+        # model.add(layers.Dropout(0.2))
+        # model.add(layers.Dense(64, activation='relu'))
+        # model.add(layers.Dropout(0.2))
         model.add(layers.Dense(dim_out))
+
+        with open('python/model_summary.txt', 'w') as ms:
+            model.summary(print_fn=lambda x: ms.write(x + '\n'))
 
         model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics=['accuracy'])
@@ -93,5 +96,24 @@ class Model():
         else:
             channels = 1
 
-        history, model, x_val, y_val = self.model(dimx, dimy, channels, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
+        if settings["num_neurons_1"] == "":
+            num_n_1 = 32
+        else:
+            num_n_1 = int(settings["num_neurons_1"])
+
+        if settings["strides_neurons_1"] == "":
+            strides_n_1 = (3, 3)
+        else:
+            s1 = int(settings["strides_neurons_1"].split(' ')[0])
+            s2 = int(settings["strides_neurons_1"].split(' ')[1])
+            strides_n_1 = (s1, s2)
+
+        if settings["max_pool_1"] == "":
+            m_pool_1 = (2, 2)
+        else:
+            p1 = int(settings["max_pool_1"].split(' ')[0])
+            p2 = int(settings["max_pool_1"].split(' ')[1])
+            m_pool_1 = (p1, p2)
+
+        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_n_1, strides_n_1, m_pool_1, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
         self.results(history, s_time)

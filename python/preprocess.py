@@ -98,12 +98,13 @@ class Preprocess():
                     image = cv2.imread(self.path_data + "/" + folder + "/" + file)
                     dimx = image.shape[0]
                     dimy = image.shape[1]
-                    print("\nAutomatically detected shape of {}x{} pixel for training images.".format(dimx, dimy))
+                    print("Automatically detected shape of {}x{} pixel for training images.".format(dimx, dimy))
                     break
                 break
         else:
             dimx = int(settings["dim"].split(' ')[0])
             dimy = int(settings["dim"].split(' ')[1])
+            print("Resizing all training images to {}x{} pixel.".format(dimx, dimy))
 
         if settings["channels"] == "2":
             channels = 3
