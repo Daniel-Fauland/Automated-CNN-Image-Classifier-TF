@@ -24,15 +24,24 @@ class Model():
 
 
     # ============================================================
-    def model(self, dimx, dimy, channels, num_n_1, strides_n_1, m_pool_1, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size):
+    def model(self, dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size):
         model = models.Sequential()
-        model.add(layers.Conv2D(num_n_1, strides_n_1, activation='relu', input_shape=(dimx, dimy, channels)))
-        model.add(layers.MaxPooling2D(m_pool_1))
-        model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+        model.add(layers.Conv2D(num_n[0], strides_n[0], activation=activation[0], input_shape=(dimx, dimy, channels)))
+        model.add(layers.MaxPooling2D(m_pool[0]))
+
+        pool = 0
+        for i in range(num_l-1):
+            model.add(layers.Conv2D(num_n[i+1], strides_n[i+1], activation=activation[i+1]))
+            if pool_layers[i+1] == "y":
+                pool += 1
+                model.add(layers.MaxPooling2D(m_pool[pool]))
         #
         model.add(layers.Flatten())
-        # model.add(layers.Dropout(0.2))
-        # model.add(layers.Dense(64, activation='relu'))
+        if dropout_1 != 0:
+            model.add(layers.Dropout(dropout_1))
+
+        for i in range(num_hidden_l):
+            model.add(layers.Dense(num_hidden_n[i], activation=hidden_activation[i]))
         # model.add(layers.Dropout(0.2))
         model.add(layers.Dense(dim_out))
 
@@ -96,24 +105,99 @@ class Model():
         else:
             channels = 1
 
-        if settings["num_neurons_1"] == "":
-            num_n_1 = 32
-        else:
-            num_n_1 = int(settings["num_neurons_1"])
+        # Model layers options
+        num_n = []
+        strides_n = []
+        m_pool = []
+        activation = []
+        num_l = settings["count_layers"]
+        pool = 0
+        pool_layers = settings["pooling_layers"]
+        print("num_l", num_l)
+        print("pool_layers", pool_layers)
+        for i in range(num_l):
+            if i == 0:
+                if settings["num_neurons_" + str(i+1)] == "":
+                    num_n.append(32)
+                else:
+                    num_n.append(int(settings["num_neurons_" + str(i+1)]))
+            else:
+                if settings["num_neurons_" + str(i+1)] == "":
+                    num_n.append(64)
+                else:
+                    num_n.append(int(settings["num_neurons_" + str(i+1)]))
 
-        if settings["strides_neurons_1"] == "":
-            strides_n_1 = (3, 3)
-        else:
-            s1 = int(settings["strides_neurons_1"].split(' ')[0])
-            s2 = int(settings["strides_neurons_1"].split(' ')[1])
-            strides_n_1 = (s1, s2)
+            if settings["strides_neurons_" + str(i+1)] == "":
+                strides_n.append((3, 3))
+            else:
+                s1 = int(settings["strides_neurons_" + str(i+1)].split(' ')[0])
+                s2 = int(settings["strides_neurons_" + str(i+1)].split(' ')[1])
+                strides_n.append((s1, s2))
 
-        if settings["max_pool_1"] == "":
-            m_pool_1 = (2, 2)
-        else:
-            p1 = int(settings["max_pool_1"].split(' ')[0])
-            p2 = int(settings["max_pool_1"].split(' ')[1])
-            m_pool_1 = (p1, p2)
+            if pool_layers[i] == "y":
+                pool += 1
+                if settings["max_pool_" + str(pool)] == "":
+                    m_pool.append((2, 2))
+                else:
+                    p1 = int(settings["max_pool_" + str(pool)].split(' ')[0])
+                    p2 = int(settings["max_pool_" + str(pool)].split(' ')[1])
+                    m_pool.append((p1, p2))
 
-        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_n_1, strides_n_1, m_pool_1, dim_out, x_train, x_val, y_train, y_val, epochs, batch_size)
+            if settings["activation_type_" + str(i+1)] == "2":
+                activation.append("sigmoid")
+            elif settings["activation_type_" + str(i+1)] == "3":
+                activation.append("softmax")
+            elif settings["activation_type_" + str(i+1)] == "4":
+                activation.append("softplus")
+            elif settings["activation_type_" + str(i+1)] == "5":
+                activation.append("softsign")
+            elif settings["activation_type_" + str(i+1)] == "6":
+                activation.append("sanh")
+            elif settings["activation_type_" + str(i+1)] == "7":
+                activation.append("selu")
+            elif settings["activation_type_" + str(i+1)] == "8":
+                activation.append("elu")
+            elif settings["activation_type_" + str(i+1)] == "9":
+                activation.append("exponential")
+            else:
+                activation.append("relu")
+
+        try:
+            if settings["dropout_1"] == "":
+                dropout_1 = 0.25
+            else:
+                dropout_1 = int(settings["dropout_1"]) / 100
+        except:
+            print("dropout_1 does not exist. The value will be 0 now")
+            dropout_1 = 0
+
+        num_hidden_n = []
+        hidden_activation = []
+        num_hidden_l = int(settings["num_hidden_layers"])
+        for i in range(num_hidden_l):
+            if settings["hidden_layer_" + str(i+1)] == "":
+                num_hidden_n.append(64)
+            else:
+                num_hidden_n.append(int(settings["hidden_layer_" + str(i+1)]))
+
+            if settings["hidden_layer_activation_" + str(i+1)] == "2":
+                hidden_activation.append("sigmoid")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "3":
+                hidden_activation.append("softmax")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "4":
+                hidden_activation.append("softplus")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "5":
+                hidden_activation.append("softsign")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "6":
+                hidden_activation.append("sanh")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "7":
+                hidden_activation.append("selu")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "8":
+                hidden_activation.append("elu")
+            elif settings["hidden_layer_activation_" + str(i+1)] == "9":
+                hidden_activation.append("exponential")
+            else:
+                hidden_activation.append("relu")
+
+        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size)
         self.results(history, s_time)
