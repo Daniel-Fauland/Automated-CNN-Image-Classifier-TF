@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 
 
 class Predict():
@@ -38,7 +39,7 @@ class Predict():
                       "the file and try again.".format(file))
                 print("=" * 100)
                 sys.exit(1)
-        return images, src_images
+        return images, src_images, data
 
 
     # ============================================================
@@ -90,10 +91,11 @@ class Predict():
 
 
     # ============================================================
-    def predict_data(self, src_images, predictions):
+    def predict_data(self, src_images, predictions, data):
         labels_file_name = self.df["csv_name"][0]
         df_labels = pd.read_csv("labels/" + labels_file_name)
         label_names = df_labels[self.df["csv_column"][0]].tolist()
+        prediction_list = []
         label_names_str = []
         for label in label_names:
             label_names_str.append(str(label))
@@ -102,13 +104,18 @@ class Predict():
             image = src_images[i]
             plt.imshow(image)
             plt.title("Prediction: " + label_names_str[np.argmax(predictions[i])])
+            prediction_list.append(label_names_str[np.argmax(predictions[i])])
             plt.show()
+
+        df = {"File": data, "Prediction": prediction_list}
+        df = pd.DataFrame(df)
+        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
 
     # ============================================================
     def initialize(self):
-        images, src_images = self.get_images()
+        images, src_images, data = self.get_images()
         images = self.preprocess_data(images)
         predictions = self.load_model(images)
-        self.predict_data(src_images, predictions)
+        self.predict_data(src_images, predictions, data)
 
