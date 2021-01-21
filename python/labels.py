@@ -20,7 +20,7 @@ class Labels():
 
         elif len(files) > 1:
             option = " label options "
-            print("*" * 30 + option + "*" * 30)
+            print("\n" + "*" * 30 + option + "*" * 30)
             for n, i in enumerate(files):
                 print("[{}]: '{}'".format(n+1, i))
             print("[{}]: Create label file yourself".format(len(files)+1))
@@ -33,7 +33,7 @@ class Labels():
 
         else:
             option = " label options "
-            print("*" * 30 + option + "*" * 30)
+            print("\n" + "*" * 30 + option + "*" * 30)
             print("[1]: Create label file yourself\n"
                            "[2]: Exit program")
             inp = input(("No labels file found in this directory. Type either '1' or '2' (default = '1'): "))

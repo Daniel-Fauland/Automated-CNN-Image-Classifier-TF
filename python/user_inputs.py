@@ -1,4 +1,5 @@
 from python.labels import Labels
+from python.augmentation import Augmentation
 import sys
 import time
 
@@ -12,7 +13,20 @@ class User_inputs():
         print("The default values can also be chosen by hitting enter")
         print("Read the GitHub (https://github.com/Daniel-Fauland/Automated-CNN-Image-Classifier-TF) for further instructions")
         print("="*110 + "\n")
+
         settings = {}
+        # ==========================================================
+        option = " augmentation options "
+        print("*" * 30 + option + "*" * 30)
+        print("[1]: Don't augment any images\n[2]: Rotate by 90 degrees\n[3]: Rotate by 180 degrees\n[4]: Rotate by 270 degrees\n[5]: Randomly "
+              "flip left or right\n[6]: Randomly flip up or down\n[7]: Randomly change hue\n[8]: Randomly change saturation "
+              "\n[9]: Randomly change brightness\n[10]: Randomly change contrast\n[11]: Delete all current augmentations")
+        augmentation_inp = input("Augment your training data. Type e.g. '2 4 10' for option [2], [4] and [10] (default = '1'; type '11' to delete "
+                    "all current augmented images): ").split(' ')
+        if "11" in augmentation_inp:
+            augmentation = Augmentation()
+            augmentation_inp = augmentation.delete_augmentations()
+
         labels = Labels()
         settings["csv_name"], settings["csv_column"] = labels.initialize()
 
@@ -159,10 +173,10 @@ class User_inputs():
         # --- Choose execution mode ---
         option = " execution options "
         print("\n" + "*" * 30 + option + "*" * 30)
-        print("[1]: Automatic (Use GPU or CPU depending on your installation. If you have a NVIDIA GPU and you get a TF "
+        print("[1]: Automatic (Use GPU or CPU depending on your installation. IMPORTANT: If you have a NVIDIA GPU and you get a TF "
               "error of any kind use one of the other options)\n"
               "[2]: Use GPU for training and CPU for predicting with memory growth enabled for the GPU (recommended if you have"
-              " a NVIDIA GPU and CUDA installed. This feature prevents TF from allocating more VRAM than the GPU actually has\n"
+              " a NVIDIA GPU and CUDA installed. This feature prevents TF from allocating more VRAM than the GPU actually has)\n"
               "[3]: Use GPU for training and predicting (Note: Predicting with GPU is slower than CPU in most cases "
               "because of initializing duration for cuda)\n"
               "[4]: Force CPU for training and predicting (CPU will be used for training the model even if you have a GPU available)")
@@ -176,4 +190,7 @@ class User_inputs():
         option = " START "
         print("\n" + "*" * 30 + option + "*" * 30)
         print()
+        if "1" not in augmentation_inp and augmentation_inp != [""]:
+            augmentation = Augmentation()
+            augmentation.initialize(augmentation_inp)
         return settings
