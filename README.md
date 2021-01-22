@@ -26,13 +26,14 @@ The goal of this project is to provide an easy way to train and predict a CNN in
 ## Installation
 1. Clone this repository to your machine via the following command:
 ``` shell
-git clone https://github.com/tensorflow/nmt/
+git clone https://github.com/Daniel-Fauland/Automated-CNN-Image-Classifier-TF/tree/master
 ```
 2. Install [**requirements.txt**](requirements.txt):
 ``` shell
 pip install requirements.txt
 ```
-3. Extract your training data to the folder *'training_data'*, put your labels file in form of a csv into the *'labels'* folder (if you have a labels file)
+3. Extract your training data to the folder *'training_data'*. 
+4. Put your labels file in form of a csv into the *'labels'* folder (optional).
 
 ## Train a model
 Make sure your training data and labels file (if you have one) fulfill the following conditions:
@@ -125,4 +126,4 @@ Make sure your prediction data fulfills the following conditions:
 - The file names contain only the following characters: **'a-z A-Z 0-9 _ - + . \*'**
 
 ## Change the predefined model structure
-The predefined model structure can be changed in [**user_inputs.py**](python/user_inputs.py)
+The predefined model structure can be changed in [**predefined_model.py**](python/predefined_model.py)
