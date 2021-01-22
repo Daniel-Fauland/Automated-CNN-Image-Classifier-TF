@@ -1,8 +1,10 @@
 import os
 import sys
+import re
 import tensorflow as tf
 import time
 from tensorflow.keras import layers, models
+from datetime import datetime
 import matplotlib.pyplot as plt
 
 
@@ -26,7 +28,7 @@ class Model():
     # ============================================================
     def model(self, dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1,
               dropout_2, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val,
-              epochs, batch_size):
+              epochs, batch_size, predefined):
         # ---Model configuration---
         model = models.Sequential()
         model.add(layers.Conv2D(num_n[0], strides_n[0], activation=activation[0], input_shape=(dimx, dimy, channels)))
@@ -56,8 +58,12 @@ class Model():
             model.add(layers.Dense(dim_out))  # Num neurons in last layer will always depend on the number of your categorizes
             # ---End of model configuration---
 
-            with open('python/model_summary.txt', 'w') as ms:
-                model.summary(print_fn=lambda x: ms.write(x + '\n'))
+            if predefined != "y":
+                with open('python/model_summary.txt', 'w') as ms:
+                    model.summary(print_fn=lambda x: ms.write(x + '\n'))
+            else:
+                with open('python/predefined_model_summary.txt', 'w') as ms:
+                    model.summary(print_fn=lambda x: ms.write(x + '\n'))
 
                 model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                               metrics=['accuracy'])
@@ -70,7 +76,10 @@ class Model():
 
         history = model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size,
                             validation_data=(x_val, y_val))
-        model.save(self.checkpoint_dir + "/model.h5")
+
+        now = datetime.now()
+        timestamp = now.strftime("%d_%m_%Y__%H_%M_%S")
+        model.save(self.checkpoint_dir + "/model_" + timestamp + ".h5")
         return history, model, x_val, y_val
 
 
@@ -230,5 +239,11 @@ class Model():
             else:
                 hidden_activation.append("relu")
 
-        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1, dropout_2, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val, epochs, batch_size)
+
+
+
+        predefined = settings["predefined_model"]
+        history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1,
+                                                  dropout_2, num_hidden_l, num_hidden_n, hidden_activation, x_train, x_val, y_train, y_val,
+                                                  epochs, batch_size, predefined)
         self.results(history, s_time)

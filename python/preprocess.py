@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import re
+import time
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -11,6 +12,7 @@ from python.model import Model
 class Preprocess():
     def __init__(self):
         self.path_data = "training_data"
+        self.checkpoint_dir = "./checkpoints"
 
 
     # ============================================================
@@ -83,6 +85,28 @@ class Preprocess():
 
     # ============================================================
     def initialize(self, settings):
+        def sorted_nicely(l):
+            """ Sort the given iterable in the way that humans expect."""
+            convert = lambda text: int(text) if text.isdigit() else text
+            alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+            return sorted(l, key=alphanum_key)
+
+        if os.path.exists(self.checkpoint_dir + "/your model will be saved in this directory.txt"):
+            os.remove(self.checkpoint_dir + "/your model will be saved in this directory.txt")
+
+        if settings["model_save"] == "2" or settings["model_save"] == "3":
+            data = os.listdir(self.checkpoint_dir)
+            data = sorted_nicely(data)
+            if settings["model_save"] == "2":
+                if len(data) > 0:
+                    os.remove(self.checkpoint_dir + "/" + data[0])
+                    time.sleep(1)
+            if settings["model_save"] == "3":
+                if len(data) > 0:
+                    for i in range(len(data)):
+                        os.remove(self.checkpoint_dir + "/" + data[i])
+                    time.sleep(1)
+
         if settings["validation"] == "":
             validation = 0.2
         else:

@@ -1,6 +1,7 @@
 import os
 import sys
 import cv2
+import re
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -11,9 +12,9 @@ from tabulate import tabulate
 class Predict():
     def __init__(self):
         self.path_data = "predict_data"
+        self.checkpoint_dir = "checkpoints"
         params = "python/predict_params.csv"
         self.df = pd.read_csv(params)
-
 
     # ============================================================
     def get_images(self):
@@ -41,7 +42,6 @@ class Predict():
                 sys.exit(1)
         return images, src_images, data
 
-
     # ============================================================
     def preprocess_data(self, images):
         def normalize(img, img_normalize, channels):
@@ -68,9 +68,13 @@ class Predict():
         images = images.reshape(images.shape[0], images.shape[1], images.shape[2], channels)
         return images
 
-
     # ============================================================
     def load_model(self, images):
+        def sorted_nicely(l):
+            """ Sort the given iterable in the way that humans expect."""
+            convert = lambda text: int(text) if text.isdigit() else text
+            alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+            return sorted(l, key=alphanum_key)
 
         if str(self.df["mode"][0]) == "3":
             # --- prevent TF from using more VRAM than the GPU actually has ---
@@ -85,10 +89,22 @@ class Predict():
             os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # force CPU Usage, instead of GPU
 
         # --- load the model using the load_model function from keras ---
-        model = tf.keras.models.load_model("checkpoints/model.h5")
+        data = os.listdir(self.checkpoint_dir)
+        if len(data) > 1:
+            data = sorted_nicely(data)
+            for i in range(len(data)):
+                print("[{}]: '{}'".format(i + 1, data[i]))
+            inp = input("There are multiple files in this directory. (Choose file with number between "
+                        "'1' and '{}'; default = '{}'): ".format(len(data), len(data)))
+            if inp == "":
+                file = data[len(data) - 1]
+            else:
+                file = data[int(inp) - 1]
+            model = tf.keras.models.load_model(self.checkpoint_dir + "/" + file)
+        else:
+            model = tf.keras.models.load_model(self.checkpoint_dir + "/" + data[0])
         prediction = model.predict(images)
         return prediction
-
 
     # ============================================================
     def predict_data(self, src_images, predictions, data):
@@ -111,11 +127,9 @@ class Predict():
         df = pd.DataFrame(df)
         print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
-
     # ============================================================
     def initialize(self):
         images, src_images, data = self.get_images()
         images = self.preprocess_data(images)
         predictions = self.load_model(images)
         self.predict_data(src_images, predictions, data)
-

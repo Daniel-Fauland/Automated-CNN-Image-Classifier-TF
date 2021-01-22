@@ -1,12 +1,13 @@
 from python.labels import Labels
 from python.augmentation import Augmentation
+from python.predefined_model import Predefined_model
 import sys
 import time
 
 
 class User_inputs():
     def __init__(self):
-        pass
+        self.checkpoint_dir = "./checkpoints"
 
     def initialize(self):
         print("="*39 + " Automated-CNN-Image-Classifier " + "="*39)
@@ -51,8 +52,12 @@ class User_inputs():
 
         option = " model options "
         print("\n" + "*" * 30 + option + "*" * 30)
-        print("[1]: Customize model structure yourself\n[2]: Use predefined model structure (can be viewed in 'python/predefined_model_summary.txt')")
+        print("[1]: Don't delete any previous model files\n[2]: Delete oldest existing model file\n[3]: Delete all existing model files")
+        settings["model_save"] = input("Type either '1', '2' or '3' (default = '1'): ")
+
+        print("\n[1]: Customize model structure yourself\n[2]: Use predefined model structure (can be viewed in 'python/predefined_model_summary.txt')")
         inp = input("Type either '1' or '2' (default = '1'): ")
+        settings["predefined_model"] = "n"
         if inp != '2':
             # --- These are the options to customize the model ---
             settings["count_layers"] = 1
@@ -153,22 +158,9 @@ class User_inputs():
             if inp != "2":
                 settings["dropout_2"] = input("Choose dropout ratio in % (default = '25'): ")
         else:
-            # --- These are the settings for the predefined model ---
-            settings["count_layers"] = 2
-            settings["num_neurons_1"] = "64"
-            settings["num_neurons_2"] = "64"
-            settings["activation_type_1"] = "1"
-            settings["activation_type_2"] = "1"
-            settings["strides_neurons_1"] = "3 3"
-            settings["strides_neurons_2"] = "3 3"
-            settings["pooling_layers"] = ["y", "y"]
-            settings["max_pool_1"] = "2 2"
-            settings["max_pool_2"] = "2 2"
-            settings["dropout_1"] = "20"
-            settings["num_hidden_layers"] = 1
-            settings["hidden_layer_1"] = "64"
-            settings["hidden_layer_activation_1"] = "1"
-            settings["dropout_2"] = "20"
+            predefined_model = Predefined_model()
+            settings = predefined_model.initialize(settings)
+            settings["predefined_model"] = "y"
 
         # --- Choose execution mode ---
         option = " execution options "
@@ -194,3 +186,5 @@ class User_inputs():
             augmentation = Augmentation()
             augmentation.initialize(augmentation_inp)
         return settings
+
+

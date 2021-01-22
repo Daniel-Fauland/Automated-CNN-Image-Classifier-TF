@@ -9,6 +9,13 @@ import numpy as np
 class Augmentation():
     def __init__(self):
         self.path_data = "training_data"
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        if gpus:
+            try:
+                for gpu in gpus:
+                    tf.config.experimental.set_memory_growth(gpu, True)
+            except RuntimeError as e:
+                print(e)
 
 
     # ============================================================
@@ -53,7 +60,7 @@ class Augmentation():
                     cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_flip_up_down_" + file, np.float32(aug_img_up_down))
                     count_img += 1
                 if "7" in augmentation_inp:
-                    aug_img_r_hue = tf.image.random_hue(image, 0.08)
+                    aug_img_r_hue = tf.image.random_hue(image, 0.1)
                     cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_hue_" + file, np.float32(aug_img_r_hue))
                     count_img += 1
                 if "8" in augmentation_inp:
