@@ -58,7 +58,7 @@ You have various options for image augmentation:
 - \[10]: Randomly change contrast --> The [contrast](https://www.tensorflow.org/api_docs/python/tf/image/random_contrast) will randomly be changed between **0.7** and **1.3**
 
 You can choose one or more options with by typing the displayed number separated by space. For example the input '2 5 7' will rotate the images by 90 degrees, randomly flip left or right and randomly change the hue.
-Type '1' or click enter to skip the augmentation. You can also delete your augmentations by typing '11'.
+Type '1' or click enter to skip the augmentation. You can also delete your augmentations by typing '11'. <br />
 The values of hue, saturation, brightness and contrast can be changed in [**augmentation.py**](python/augmentation.py).
 
 ### Label options
@@ -124,6 +124,7 @@ Make sure your prediction data fulfills the following conditions:
 - You put only images insides the *predict_data* folder (no folders).
 - All images are either **'.png'** or **'.jpg'** or **'.jpeg'**
 - The file names contain only the following characters: **'a-z A-Z 0-9 _ - + . \*'**
+
 
 ## Change the predefined model structure
 The predefined model structure can be changed in [**predefined_model.py**](python/predefined_model.py)
