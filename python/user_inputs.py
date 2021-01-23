@@ -3,6 +3,7 @@ from python.augmentation import Augmentation
 from python.predefined_model import Predefined_model
 import sys
 import time
+import platform
 
 
 class User_inputs():
@@ -17,6 +18,13 @@ class User_inputs():
 
         settings = {}
         # ==========================================================
+        if platform.system() != "Windows":
+            settings["os"] = "y"
+        else:
+            settings["os"] = "n"
+
+
+        # ==========================================================
         option = " augmentation options "
         print("*" * 30 + option + "*" * 30)
         print("[1]: Don't augment any images\n[2]: Rotate by 90 degrees\n[3]: Rotate by 180 degrees\n[4]: Rotate by 270 degrees\n[5]: Randomly "
@@ -26,7 +34,7 @@ class User_inputs():
                     "all current augmented images): ").split(' ')
         if "11" in augmentation_inp:
             augmentation = Augmentation()
-            augmentation_inp = augmentation.delete_augmentations()
+            augmentation_inp = augmentation.delete_augmentations(settings)
 
         labels = Labels()
         settings["csv_name"], settings["csv_column"] = labels.initialize()
@@ -184,7 +192,7 @@ class User_inputs():
         print()
         if "1" not in augmentation_inp and augmentation_inp != [""]:
             augmentation = Augmentation()
-            augmentation.initialize(augmentation_inp)
+            augmentation.initialize(augmentation_inp, settings)
         return settings
 
 

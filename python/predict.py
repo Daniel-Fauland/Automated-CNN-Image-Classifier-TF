@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import re
+import time
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -28,6 +29,7 @@ class Predict():
         data = os.listdir(self.path_data)
         if ".DS_Store" in data:  # Only necessary for MacOS
             os.remove(self.path_data + "/" + ".DS_Store")
+            time.sleep(1)
             data = os.listdir(self.path_data)
         for file in data:
             try:
@@ -93,6 +95,10 @@ class Predict():
 
         # --- load the model using the load_model function from keras ---
         data = os.listdir(self.checkpoint_dir)
+        if ".DS_Store" in data:  # Only necessary for MacOS
+            os.remove(self.checkpoint_dir + "/" + ".DS_Store")
+            time.sleep(1)
+            data = os.listdir(self.checkpoint_dir)
         if len(data) > 1:
             data = sorted_nicely(data)
             for i in range(len(data)):

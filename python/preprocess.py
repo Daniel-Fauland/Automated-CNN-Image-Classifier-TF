@@ -16,7 +16,7 @@ class Preprocess():
 
 
     # ============================================================
-    def load_data(self, validation, dimx, dimy):
+    def load_data(self, validation, dimx, dimy, os_mode):
         def sorted_nicely(data):
             """ Sort the given iterable in the way that humans expect."""
             convert = lambda text: int(text) if text.isdigit() else text
@@ -26,23 +26,43 @@ class Preprocess():
         if os.path.exists(self.path_data + "/Insert your training data in this directory.txt"):
             os.remove(self.path_data + "/Insert your training data in this directory.txt")
 
-        data = os.listdir(self.path_data)
-        if ".DS_Store" in data:  # ONLY NECESSARY FOR MACOS
-            os.remove(self.path_data + "/" + ".DS_Store")
-            data = os.listdir(self.path_data)
-        data = sorted_nicely(data)
         count = 0
         images, categories = [], []
-        for folder in data:
-            f = os.listdir(self.path_data + "/" + folder)
-            for file in f:
-                image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                image = cv2.resize(image, (dimx, dimy))
-                images.append(image)
-                categories.append(count)
+        data = os.listdir(self.path_data)
+        if os_mode == "y":  # If OS is MacOS
+            if ".DS_Store" in data:  # Only necessary for MacOS
+                os.remove(self.path_data + "/" + ".DS_Store")
+                time.sleep(1)
+                data = os.listdir(self.path_data)
+                data = sorted_nicely(data)
+            data = sorted_nicely(data)
+            for folder in data:
+                f = os.listdir(self.path_data + "/" + folder)
+                if ".DS_Store" in f:  # Only necessary for MacOS
+                    os.remove(self.path_data + "/" + folder + "/" + ".DS_Store")
+                    time.sleep(1)
+                    f = os.listdir(self.path_data + "/" + folder)
+                for file in f:
+                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                    image = cv2.resize(image, (dimx, dimy))
+                    images.append(image)
+                    categories.append(count)
 
-            count += 1
-            sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
+                count += 1
+                sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
+
+        else:
+            data = sorted_nicely(data)
+            for folder in data:
+                f = os.listdir(self.path_data + "/" + folder)
+                for file in f:
+                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                    image = cv2.resize(image, (dimx, dimy))
+                    images.append(image)
+                    categories.append(count)
+
+                count += 1
+                sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
 
 
         # --- split trainingData into train and validation ---
@@ -139,7 +159,7 @@ class Preprocess():
             channels = 1
         img_normalize = settings["normalize"]
 
-        x_train, x_val, y_train, y_val, dim_out = self.load_data(validation, dimx, dimy)
+        x_train, x_val, y_train, y_val, dim_out = self.load_data(validation, dimx, dimy, settings["os"])
         x_train, x_val, y_train, y_val = self.preprocess_data(x_train, x_val, y_train, y_val, img_normalize, channels)
 
         df = {"dimx": [dimx], "dimy": [dimy], "csv_name": [settings["csv_name"]], "csv_column": [settings["csv_column"]],

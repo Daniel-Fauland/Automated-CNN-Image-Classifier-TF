@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import re
+import time
 import tensorflow as tf
 import numpy as np
 
@@ -19,7 +20,7 @@ class Augmentation():
 
 
     # ============================================================
-    def initialize(self, augmentation_inp):
+    def initialize(self, augmentation_inp, settings):
         def sorted_nicely(data):
             """ Sort the given iterable in the way that humans expect."""
             convert = lambda text: int(text) if text.isdigit() else text
@@ -30,12 +31,22 @@ class Augmentation():
             os.remove(self.path_data + "/Insert your training data in this directory.txt")
 
         data = os.listdir(self.path_data)
+        if settings["os"] == "y":
+            if ".DS_Store" in data:  # Only necessary for MacOS
+                os.remove(self.path_data + "/" + ".DS_Store")
+                time.sleep(1)
+                data = os.listdir(self.path_data)
         data = sorted_nicely(data)
         count = 0
         count_src = 0
         count_img = 0
         for folder in data:
             f = os.listdir(self.path_data + "/" + folder)
+            if settings["os"] == "y":
+                if ".DS_Store" in f:  # Only necessary for MacOS
+                    os.remove(self.path_data + "/" + folder + "/" + ".DS_Store")
+                    time.sleep(1)
+                    f = os.listdir(self.path_data + "/" + folder)
             count_src += len(f)
             for file in f:
                 image = cv2.imread(self.path_data + "/" + folder + "/" + file)
@@ -82,7 +93,7 @@ class Augmentation():
         return
 
 
-    def delete_augmentations(self):
+    def delete_augmentations(self, settings):
         def sorted_nicely(data):
             """ Sort the given iterable in the way that humans expect."""
             convert = lambda text: int(text) if text.isdigit() else text
@@ -94,12 +105,22 @@ class Augmentation():
 
         print()
         data = os.listdir(self.path_data)
+        if settings["os"] == "y":
+            if ".DS_Store" in data:  # Only necessary for MacOS
+                os.remove(self.path_data + "/" + ".DS_Store")
+                time.sleep(1)
+                data = os.listdir(self.path_data)
         data = sorted_nicely(data)
         count = 0
         count_src = 0
         count_img = 0
         for folder in data:
             f = os.listdir(self.path_data + "/" + folder)
+            if settings["os"] == "y":
+                if ".DS_Store" in f:  # Only necessary for MacOS
+                    os.remove(self.path_data + "/" + folder + "/" + ".DS_Store")
+                    time.sleep(1)
+                    f = os.listdir(self.path_data + "/" + folder)
             count_src += len(f)
             for file in f:
                 image = self.path_data + "/" + folder + "/" + file
@@ -121,8 +142,9 @@ class Augmentation():
                   "flip left or right\n[6]: Randomly flip up or down\n[7]: Randomly change hue\n[8]: Randomly change saturation "
                   "\n[9]: Randomly change brightness\n[10]: Randomly change contrast")
             augmentation_inp = input("Augment your training data. Type e.g. '2 4 10' for option [2], [4] and [10] (default = '1'): ").split(' ')
-            if "1" not in augmentation_inp and augmentation_inp != [""]:
-                self.initialize(augmentation_inp)
+            # if "1" not in augmentation_inp and augmentation_inp != [""]:
+            #     self.initialize(augmentation_inp, settings)
+            return augmentation_inp
         else:
             sys.exit(1)
 
