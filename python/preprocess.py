@@ -73,7 +73,7 @@ class Preprocess():
 
         if len(error) > 0:
             print("\n" + "=" * 100)
-            print("WARNING: {} files could not be read for some reason. They were skipped instead.".format(len(error)))
+            print("WARNING: {} file(s) could not be read for some reason. They were skipped instead.".format(len(error)))
             print("These files are:")
             for i in error:
                 print(i)
@@ -175,8 +175,8 @@ class Preprocess():
         x_train, x_val, y_train, y_val, dim_out = self.load_data(validation, dimx, dimy, settings["os"])
         x_train, x_val, y_train, y_val = self.preprocess_data(x_train, x_val, y_train, y_val, img_normalize, channels)
 
-        df = {"dimx": [dimx], "dimy": [dimy], "csv_name": [settings["csv_name"]], "csv_column": [settings["csv_column"]],
-              "img_normalize": [img_normalize], "channels": [channels], "mode": [settings["mode"]]}
+        df = {"csv_name": [settings["csv_name"]], "csv_column": [settings["csv_column"]],
+              "img_normalize": [img_normalize], "mode": [settings["mode"]]}
         df = pd.DataFrame(df)
         df.to_csv("python/predict_params.csv")
         mode = settings["mode"]
