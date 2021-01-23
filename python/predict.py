@@ -41,7 +41,7 @@ class Predict():
             except:
                 print("=" * 100)
                 print("ERROR! OpenCV could not open the file '{}'\n"
-                      "This is probably due to an invalid character in the file name\nRename "
+                      "This is probably due to an invalid character in the file name or the file is corrupted in some way.\nRename "
                       "the file and try again.".format(file))
                 print("=" * 100)
                 sys.exit(1)

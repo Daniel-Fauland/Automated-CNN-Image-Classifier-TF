@@ -28,6 +28,7 @@ class Preprocess():
 
         count = 0
         images, categories = [], []
+        error = []
         data = os.listdir(self.path_data)
         if os_mode == "y":  # If OS is MacOS
             if ".DS_Store" in data:  # Only necessary for MacOS
@@ -43,10 +44,13 @@ class Preprocess():
                     time.sleep(1)
                     f = os.listdir(self.path_data + "/" + folder)
                 for file in f:
-                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                    image = cv2.resize(image, (dimx, dimy))
-                    images.append(image)
-                    categories.append(count)
+                    try:
+                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                        image = cv2.resize(image, (dimx, dimy))
+                        images.append(image)
+                        categories.append(count)
+                    except:
+                        error.append(folder + "/" + file)
 
                 count += 1
                 sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
@@ -56,15 +60,24 @@ class Preprocess():
             for folder in data:
                 f = os.listdir(self.path_data + "/" + folder)
                 for file in f:
-                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                    image = cv2.resize(image, (dimx, dimy))
-                    images.append(image)
-                    categories.append(count)
+                    try:
+                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                        image = cv2.resize(image, (dimx, dimy))
+                        images.append(image)
+                        categories.append(count)
+                    except:
+                        error.append(folder + "/" + file)
 
                 count += 1
                 sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
 
-
+        if len(error) > 0:
+            print("\n" + "=" * 100)
+            print("WARNING: {} files could not be read for some reason. They were skipped instead.".format(len(error)))
+            print("These files are:")
+            for i in error:
+                print(i)
+            print("=" * 100)
         # --- split trainingData into train and validation ---
         x_train, x_val, y_train, y_val = train_test_split(images, categories, test_size=validation)
         print("")
