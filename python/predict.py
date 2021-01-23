@@ -18,12 +18,12 @@ class Predict():
         self.df = pd.read_csv(params)
 
     # ============================================================
-    def get_images(self):
+    def get_images(self, shape):
         if os.path.exists(self.path_data + "/insert your own images here that you want to predict.txt"):
             os.remove(self.path_data + "/insert your own images here that you want to predict.txt")
 
-        dimx = self.df["dimx"][0]
-        dimy = self.df["dimy"][0]
+        dimx = shape[1]
+        dimy = shape[2]
         images = []
         src_images = []
         data = os.listdir(self.path_data)
@@ -48,7 +48,7 @@ class Predict():
         return images, src_images, data
 
     # ============================================================
-    def preprocess_data(self, images):
+    def preprocess_data(self, images, shape):
         def normalize(img, img_normalize, channels):
             if channels == 3:
                 pass
@@ -64,7 +64,7 @@ class Predict():
             return img
 
         img_normalize = str(self.df["img_normalize"][0])
-        channels = self.df["channels"][0]
+        channels = shape[3]
 
         for x in range(len(images)):
             images[x] = normalize(images[x], img_normalize, channels)
@@ -74,7 +74,30 @@ class Predict():
         return images
 
     # ============================================================
-    def load_model(self, images):
+    def predict_data(self, src_images, predictions, data, file):
+        labels_file_name = self.df["csv_name"][0]
+        df_labels = pd.read_csv("labels/" + labels_file_name)
+        label_names = df_labels[self.df["csv_column"][0]].tolist()
+        prediction_list = []
+        label_names_str = []
+        for label in label_names:
+            label_names_str.append(str(label))
+
+        for i in range(len(src_images)):
+            image = src_images[i]
+            plt.imshow(image)
+            plt.title("Prediction: " + label_names_str[np.argmax(predictions[i])])
+            prediction_list.append(label_names_str[np.argmax(predictions[i])])
+            plt.show()
+
+        df = {"File": data, "Prediction": prediction_list}
+        df = pd.DataFrame(df)
+        print("Predictions for model file:", file)
+        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+
+
+    # ============================================================
+    def initialize(self):
         def sorted_nicely(l):
             """ Sort the given iterable in the way that humans expect."""
             convert = lambda text: int(text) if text.isdigit() else text
@@ -99,6 +122,7 @@ class Predict():
             os.remove(self.checkpoint_dir + "/" + ".DS_Store")
             time.sleep(1)
             data = os.listdir(self.checkpoint_dir)
+
         if len(data) > 1:
             data = sorted_nicely(data)
             for i in range(len(data)):
@@ -111,34 +135,13 @@ class Predict():
                 file = data[int(inp) - 1]
             model = tf.keras.models.load_model(self.checkpoint_dir + "/" + file)
         else:
-            model = tf.keras.models.load_model(self.checkpoint_dir + "/" + data[0])
-        prediction = model.predict(images)
-        return prediction
+            file = data[0]
+            model = tf.keras.models.load_model(self.checkpoint_dir + "/" + file)
 
-    # ============================================================
-    def predict_data(self, src_images, predictions, data):
-        labels_file_name = self.df["csv_name"][0]
-        df_labels = pd.read_csv("labels/" + labels_file_name)
-        label_names = df_labels[self.df["csv_column"][0]].tolist()
-        prediction_list = []
-        label_names_str = []
-        for label in label_names:
-            label_names_str.append(str(label))
+        config = model.get_config()
+        shape = config["layers"][0]["config"]["batch_input_shape"]
 
-        for i in range(len(src_images)):
-            image = src_images[i]
-            plt.imshow(image)
-            plt.title("Prediction: " + label_names_str[np.argmax(predictions[i])])
-            prediction_list.append(label_names_str[np.argmax(predictions[i])])
-            plt.show()
-
-        df = {"File": data, "Prediction": prediction_list}
-        df = pd.DataFrame(df)
-        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-
-    # ============================================================
-    def initialize(self):
-        images, src_images, data = self.get_images()
-        images = self.preprocess_data(images)
-        predictions = self.load_model(images)
-        self.predict_data(src_images, predictions, data)
+        images, src_images, data = self.get_images(shape)
+        images = self.preprocess_data(images, shape)
+        predictions = model.predict(images)
+        self.predict_data(src_images, predictions, data, file)
