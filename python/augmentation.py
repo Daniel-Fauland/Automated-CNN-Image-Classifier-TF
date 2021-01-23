@@ -40,6 +40,7 @@ class Augmentation():
         count = 0
         count_src = 0
         count_img = 0
+        error = []
         for folder in data:
             f = os.listdir(self.path_data + "/" + folder)
             if settings["os"] == "y":
@@ -49,47 +50,57 @@ class Augmentation():
                     f = os.listdir(self.path_data + "/" + folder)
             count_src += len(f)
             for file in f:
-                image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                if "2" in augmentation_inp:
-                    aug_img_rot1 = tf.image.rot90(image, k=1)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot1))
-                    count_img += 1
-                if "3" in augmentation_inp:
-                    aug_img_rot2 = tf.image.rot90(image, k=2)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot2))
-                    count_img += 1
-                if "4" in augmentation_inp:
-                    aug_img_rot3 = tf.image.rot90(image, k=3)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot3))
-                    count_img += 1
-                if "5" in augmentation_inp:
-                    aug_img_right_left = tf.image.random_flip_left_right(image)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_flip_left_right_" + file, np.float32(aug_img_right_left))
-                    count_img += 1
-                if "6" in augmentation_inp:
-                    aug_img_up_down = tf.image.random_flip_up_down(image)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_flip_up_down_" + file, np.float32(aug_img_up_down))
-                    count_img += 1
-                if "7" in augmentation_inp:
-                    aug_img_r_hue = tf.image.random_hue(image, 0.1)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_hue_" + file, np.float32(aug_img_r_hue))
-                    count_img += 1
-                if "8" in augmentation_inp:
-                    aug_img_r_saturation = tf.image.random_saturation(image, 0.6, 1.6)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_saturation_" + file, np.float32(aug_img_r_saturation))
-                    count_img += 1
-                if "9" in augmentation_inp:
-                    aug_img_random_brightness = tf.image.random_brightness(image, 0.05)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_brightness_" + file, np.float32(aug_img_random_brightness))
-                    count_img += 1
-                if "10" in augmentation_inp:
-                    aug_img_random_contrast = tf.image.random_contrast(image, 0.7, 1.3)
-                    cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_contrast_" + file, np.float32(aug_img_random_contrast))
-                    count_img += 1
+                try:
+                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                    if "2" in augmentation_inp:
+                        aug_img_rot1 = tf.image.rot90(image, k=1)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot1))
+                        count_img += 1
+                    if "3" in augmentation_inp:
+                        aug_img_rot2 = tf.image.rot90(image, k=2)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot2))
+                        count_img += 1
+                    if "4" in augmentation_inp:
+                        aug_img_rot3 = tf.image.rot90(image, k=3)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot3))
+                        count_img += 1
+                    if "5" in augmentation_inp:
+                        aug_img_right_left = tf.image.random_flip_left_right(image)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_flip_left_right_" + file, np.float32(aug_img_right_left))
+                        count_img += 1
+                    if "6" in augmentation_inp:
+                        aug_img_up_down = tf.image.random_flip_up_down(image)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_flip_up_down_" + file, np.float32(aug_img_up_down))
+                        count_img += 1
+                    if "7" in augmentation_inp:
+                        aug_img_r_hue = tf.image.random_hue(image, 0.1)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_hue_" + file, np.float32(aug_img_r_hue))
+                        count_img += 1
+                    if "8" in augmentation_inp:
+                        aug_img_r_saturation = tf.image.random_saturation(image, 0.6, 1.6)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_saturation_" + file, np.float32(aug_img_r_saturation))
+                        count_img += 1
+                    if "9" in augmentation_inp:
+                        aug_img_random_brightness = tf.image.random_brightness(image, 0.05)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_brightness_" + file, np.float32(aug_img_random_brightness))
+                        count_img += 1
+                    if "10" in augmentation_inp:
+                        aug_img_random_contrast = tf.image.random_contrast(image, 0.7, 1.3)
+                        cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_random_contrast_" + file, np.float32(aug_img_random_contrast))
+                        count_img += 1
+                except:
+                    error.append(folder + "/" + file)
             count += 1
             sys.stdout.write('\r' + "Augmented folder {}/{}".format(count, len(data)))
         sys.stdout.write('\r' + "Successfully created {} augmented images.".format(count_img))
         print("\nIncreased training data from {} images to {} images.\n".format(count_src, count_src + count_img))
+        if len(error) > 0:
+            print("\n" + "=" * 100)
+            print("WARNING: {} file(s) could not be read for some reason. They were skipped instead.".format(len(error)))
+            print("These files are:")
+            for i in error:
+                print(i)
+            print("=" * 100 + "\n")
         return
 
 
