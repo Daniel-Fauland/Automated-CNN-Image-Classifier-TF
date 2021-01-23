@@ -57,7 +57,7 @@ You have various options for image augmentation:
 - \[9]: Randomly change brightness --> The [brightness](https://www.tensorflow.org/api_docs/python/tf/image/random_brightness) of an image will randomly be changed based on a delta of **0.05**
 - \[10]: Randomly change contrast --> The [contrast](https://www.tensorflow.org/api_docs/python/tf/image/random_contrast) will randomly be changed between **0.7** and **1.3**
 
-You can choose one or more options with by typing the displayed number separated by space. For example the input '2 5 7' will rotate the images by 90 degrees, randomly flip left or right and randomly change the hue.
+You can choose one or more options by typing the displayed number separated by space. For example the input '2 5 7' will rotate the images by 90 degrees, randomly flip left or right and randomly change the hue.
 Type '1' or click enter to skip the augmentation. You can also delete your augmentations by typing '11'. <br />
 The values of hue, saturation, brightness and contrast can be changed in [**augmentation.py**](python/augmentation.py).
 
