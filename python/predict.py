@@ -92,7 +92,7 @@ class Predict():
 
         df = {"File": data, "Prediction": prediction_list}
         df = pd.DataFrame(df)
-        print("Predictions for model file:", file)
+        print("\nPredictions for model file:", file)
         print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
 
