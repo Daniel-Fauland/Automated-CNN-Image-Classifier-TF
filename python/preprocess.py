@@ -28,6 +28,8 @@ class Preprocess():
 
         data = os.listdir(self.path_data)
         data = sorted_nicely(data)
+        if ".DS_Store" in data:  # Only necessary for MacOS
+            os.remove(self.path_data + "/" + ".DS_Store")
         count = 0
         images, categories = [], []
         for folder in data:
