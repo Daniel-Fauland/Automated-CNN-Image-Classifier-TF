@@ -68,6 +68,8 @@ class Labels():
         path_data = "training_data"
         data = os.listdir(path_data)
         data = sorted_nicely(data)
+        if ".DS_Store" in data:  # Only necessary for MacOS
+            os.remove(path_data + "/" + ".DS_Store")
         labels = []
         print()
         for n, folder in enumerate(data):

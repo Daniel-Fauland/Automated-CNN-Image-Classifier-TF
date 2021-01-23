@@ -26,6 +26,8 @@ class Predict():
         images = []
         src_images = []
         data = os.listdir(self.path_data)
+        if ".DS_Store" in data:  # Only necessary for MacOS
+            os.remove(self.path_data + "/" + ".DS_Store")
         for file in data:
             try:
                 image = cv2.imread(self.path_data + "/" + file)
