@@ -27,9 +27,10 @@ class Preprocess():
             os.remove(self.path_data + "/Insert your training data in this directory.txt")
 
         data = os.listdir(self.path_data)
-        data = sorted_nicely(data)
-        if ".DS_Store" in data:  # Only necessary for MacOS
+        if ".DS_Store" in data:  # ONLY NECESSARY FOR MACOS
             os.remove(self.path_data + "/" + ".DS_Store")
+            data = os.listdir(self.path_data)
+        data = sorted_nicely(data)
         count = 0
         images, categories = [], []
         for folder in data:
