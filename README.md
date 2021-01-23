@@ -26,7 +26,7 @@ The goal of this project is to provide an easy way to train and predict a CNN in
 ## Installation
 1. Clone this repository to your machine via the following command:
 ``` shell
-git clone https://github.com/Daniel-Fauland/Automated-CNN-Image-Classifier-TF/tree/master
+git clone https://github.com/Daniel-Fauland/Automated-CNN-Image-Classifier-TF.git
 ```
 2. Install [**requirements.txt**](requirements.txt):
 ``` shell
