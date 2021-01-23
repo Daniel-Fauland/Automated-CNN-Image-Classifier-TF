@@ -30,7 +30,7 @@ git clone https://github.com/Daniel-Fauland/Automated-CNN-Image-Classifier-TF.gi
 ```
 2. Install [**requirements.txt**](requirements.txt):
 ``` shell
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 3. Extract your training data to the folder *'training_data'*. 
 4. Put your labels file in form of a csv into the *'labels'* folder (optional).
