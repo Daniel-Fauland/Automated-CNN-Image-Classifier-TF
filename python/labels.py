@@ -19,7 +19,14 @@ class Labels():
 
         files = os.listdir(self.labels_path)
         if len(files) == 1:
+            print("\n[1]: Use '{}' as labels file".format(files[0]))
+            print("[2]: Create label file yourself")
+            inp = input("There is one label file in this directory. Type either '1' or '2' (default = '1'): ")
+            if inp == "2":
+                file, column_name = self.create_labels()
+                return file, column_name
             file = files[0]
+
 
         elif len(files) > 1:
             option = " label options "
