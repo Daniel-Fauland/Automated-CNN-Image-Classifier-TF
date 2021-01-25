@@ -65,8 +65,7 @@ class Model():
                 with open('python/predefined_model_summary.txt', 'w') as ms:
                     model.summary(print_fn=lambda x: ms.write(x + '\n'))
 
-                model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                              metrics=['accuracy'])
+            model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
         except:
             print("="*100)
             print("ERROR! You used to many 'Conv2D' and/or 'MaxPooling' layer which led to a negative output shape.\nTry to reduce the amount "
