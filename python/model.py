@@ -1,6 +1,6 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import sys
-import re
 import tensorflow as tf
 import time
 from tensorflow.keras import layers, models
@@ -55,14 +55,14 @@ class Model():
             if dropout_2 != 0:
                 model.add(layers.Dropout(dropout_2))
 
-            model.add(layers.Dense(dim_out))  # Num neurons in last layer will always depend on the number of your categorizes
+            model.add(layers.Dense(dim_out))  # Num neurons in last layer will always depend on the number of your categories
             # ---End of model configuration---
 
             if predefined != "y":
-                with open('python/model_summary.txt', 'w') as ms:
+                with open('python/model_summary.txt', 'w') as ms:  # save model summary in txt file
                     model.summary(print_fn=lambda x: ms.write(x + '\n'))
             else:
-                with open('python/predefined_model_summary.txt', 'w') as ms:
+                with open('python/predefined_model_summary.txt', 'w') as ms:  # # save predefined model summary in txt file
                     model.summary(print_fn=lambda x: ms.write(x + '\n'))
 
             model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
@@ -73,12 +73,11 @@ class Model():
             print("="*100)
             sys.exit(1)
 
-        history = model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size,
-                            validation_data=(x_val, y_val))
+        history = model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(x_val, y_val))
 
         now = datetime.now()
         timestamp = now.strftime("%d_%m_%Y__%H_%M_%S")
-        model.save(self.checkpoint_dir + "/model_" + timestamp + ".h5")
+        model.save(self.checkpoint_dir + "/model_" + timestamp + ".h5")  # save model with current timestamp
         return history, model, x_val, y_val
 
 
@@ -92,13 +91,13 @@ class Model():
         end_time = time.time()
         duration = end_time - s_time
         if duration <= 60:
-            duration = "The total runtime was {} seconds".format(round(duration, 2))
+            duration = "The total runtime was {} seconds".format(round(duration, 2))  # get runtime in seconds
         else:
-            duration = "The total runtime was {} minutes".format(round(duration/ 60, 2))
+            duration = "The total runtime was {} minutes".format(round(duration / 60, 2))  # get runtime in minutes
 
         print("\n========================================================================")
-        print("The highest acc ({}%) on the validation data was achieved in epoch {}".format(acc, epoch_acc))
-        print("The lowest loss ({}) on the validation data was achieved in epoch {}".format(loss, epoch_loss))
+        print("The highest acc ({}%) on the validation data was achieved in epoch {}".format(acc, epoch_acc))  # print highest val acc
+        print("The lowest loss ({}) on the validation data was achieved in epoch {}".format(loss, epoch_loss))  # print lowest val loss
         print(duration)
         print("========================================================================")
 
@@ -124,6 +123,7 @@ class Model():
     # ============================================================
     def train_model(self, x_train, x_val, y_train, y_val, dimx, dimy, dim_out, settings):
         s_time = settings["s_time"]
+        # --- process all necessary user inputs for the model ---
         if settings["epochs"] == "":
             epochs = 10
         else:
@@ -237,9 +237,7 @@ class Model():
                 hidden_activation.append("exponential")
             else:
                 hidden_activation.append("relu")
-
-
-
+        # --- end of processing all necessary user inputs for the model ---
 
         predefined = settings["predefined_model"]
         history, model, x_val, y_val = self.model(dimx, dimy, channels, num_l, num_n, strides_n, activation, pool_layers, m_pool, dim_out, dropout_1,

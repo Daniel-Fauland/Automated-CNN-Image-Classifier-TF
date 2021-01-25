@@ -37,50 +37,50 @@ class Preprocess():
                 data = os.listdir(self.path_data)
                 data = sorted_nicely(data)
             data = sorted_nicely(data)
-            for folder in data:
+            for folder in data:  # Iterate over each folder in dir 'training_data'
                 f = os.listdir(self.path_data + "/" + folder)
                 if ".DS_Store" in f:  # Only necessary for MacOS
                     os.remove(self.path_data + "/" + folder + "/" + ".DS_Store")
                     time.sleep(1)
                     f = os.listdir(self.path_data + "/" + folder)
-                for file in f:
+                for file in f:  # Iterate over each file in each folder
                     try:
-                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                        image = cv2.resize(image, (dimx, dimy))
-                        images.append(image)
-                        categories.append(count)
+                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)  # read image with open-cv
+                        image = cv2.resize(image, (dimx, dimy))  # resize image
+                        images.append(image)  # append image to array
+                        categories.append(count)  # append category/label to array
                     except:
-                        error.append(folder + "/" + file)
+                        error.append(folder + "/" + file)  # Adds file to error list if open-cv could not open it for some reason
 
                 count += 1
                 sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
 
         else:
             data = sorted_nicely(data)
-            for folder in data:
+            for folder in data:  # Iterate over each folder in dir 'training_data'
                 f = os.listdir(self.path_data + "/" + folder)
-                for file in f:
+                for file in f:  # Iterate over each file in each folder
                     try:
-                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                        image = cv2.resize(image, (dimx, dimy))
-                        images.append(image)
-                        categories.append(count)
+                        image = cv2.imread(self.path_data + "/" + folder + "/" + file)  # read image with open-cv
+                        image = cv2.resize(image, (dimx, dimy))  # resize image
+                        images.append(image)  # append image to array
+                        categories.append(count)  # append category/label to array
                     except:
-                        error.append(folder + "/" + file)
+                        error.append(folder + "/" + file)  # Adds file to error list if open-cv could not open it for some reason
 
                 count += 1
-                sys.stdout.write('\r' + "Loaded folder {}/{}".format(count, len(data)))
+                sys.stdout.write('\r' + "Loaded folder {}/{}.".format(count, len(data)))
 
         if len(error) > 0:
             print("\n" + "=" * 100)
             print("WARNING: {} file(s) could not be read for some reason. They were skipped instead.".format(len(error)))
             print("These files are:")
             for i in error:
-                print(i)
+                print("'" + i + "'")
             print("=" * 100)
         # --- split trainingData into train and validation ---
-        x_train, x_val, y_train, y_val = train_test_split(images, categories, test_size=validation)
-        print("")
+        x_train, x_val, y_train, y_val = train_test_split(images, categories, test_size=validation)  # Split into train and validation
+        print()
         return x_train, x_val, y_train, y_val, len(data)
 
 
@@ -92,8 +92,6 @@ class Preprocess():
             else:
                 img = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)  # Grayscale image
 
-            # img = cv2.equalizeHist(np.uint8(img))                  # Optimize Contrast
-
             if img_normalize == "2":
                 pass
             else:
@@ -102,18 +100,19 @@ class Preprocess():
 
 
         for x in range(len(x_train)):
-            x_train[x] = normalize(x_train[x], img_normalize, channels)
+            x_train[x] = normalize(x_train[x], img_normalize, channels)  # preprocess all training images
 
         for x in range(len(x_val)):
-            x_val[x] = normalize(x_val[x], img_normalize, channels)
+            x_val[x] = normalize(x_val[x], img_normalize, channels)  # preprocess all validation images
 
         # --- transform the data to be accepted by the model ---
-        y_train = np.array(y_train)
-        y_val = np.array(y_val)
-        x_train = np.array(x_train)
-        x_val = np.array(x_val)
-        x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], channels)
-        x_val = x_val.reshape(x_val.shape[0], x_val.shape[1], x_val.shape[2], channels)
+        y_train = np.array(y_train)  # TF only accepts numpy arrays
+        y_val = np.array(y_val)  # TF only accepts numpy arrays
+        x_train = np.array(x_train)  # TF only accepts numpy arrays
+        x_val = np.array(x_val)  # TF only accepts numpy arrays
+        # Reshape images back to its original form of width * height. (Open-cv flips width and height when resizing an image)
+        x_train = x_train.reshape(x_train.shape[0], x_train.shape[2], x_train.shape[1], channels)
+        x_val = x_val.reshape(x_val.shape[0], x_val.shape[2], x_val.shape[1], channels)
         print("Preprocessing training data complete.")
         return x_train, x_val, y_train, y_val
 
@@ -153,23 +152,23 @@ class Preprocess():
             for folder in data:
                 f = os.listdir(self.path_data + "/" + folder)
                 for file in f:
-                    if file.endswith(".txt"):
+                    if file.endswith(".txt") or file.endswith(".DS_Store"):
                         continue
                     image = cv2.imread(self.path_data + "/" + folder + "/" + file)
-                    dimx = image.shape[0]
-                    dimy = image.shape[1]
+                    dimx = image.shape[0]  # width of image
+                    dimy = image.shape[1]  # height of image
                     print("Automatically detected shape of {}x{} pixel for training images.".format(dimx, dimy))
                     break
                 break
         else:
-            dimx = int(settings["dim"].split(' ')[0])
-            dimy = int(settings["dim"].split(' ')[1])
+            dimx = int(settings["dim"].split(' ')[0])  # width
+            dimy = int(settings["dim"].split(' ')[1])  # height
             print("Resizing all training images to {}x{} pixel.".format(dimx, dimy))
 
         if settings["channels"] == "2":
-            channels = 3
+            channels = 3  # 3 --> RGB image
         else:
-            channels = 1
+            channels = 1  # 1 --> Grayscale image
         img_normalize = settings["normalize"]
 
         x_train, x_val, y_train, y_val, dim_out = self.load_data(validation, dimx, dimy, settings["os"])
@@ -177,8 +176,8 @@ class Preprocess():
 
         df = {"csv_name": [settings["csv_name"]], "csv_column": [settings["csv_column"]],
               "img_normalize": [img_normalize], "mode": [settings["mode"]]}
-        df = pd.DataFrame(df)
-        df.to_csv("python/predict_params.csv")
-        mode = settings["mode"]
+        df = pd.DataFrame(df)  # create pandas dataframe for 'predict_data' file
+        df.to_csv("python/predict_params.csv")  # save df in folder 'python'
+        mode = settings["mode"]  # execution mode
         model = Model(mode)
         model.train_model(x_train, x_val, y_train, y_val, dimx, dimy, dim_out, settings)
