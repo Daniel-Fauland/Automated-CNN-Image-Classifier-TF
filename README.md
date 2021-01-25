@@ -16,7 +16,9 @@ Fully automated TF2 CNN image classifier to automatically train and predict imag
 - [Change the predefined model structure](#change-the-predefined-model-structure)
 
 ## Introduction
-The goal of this project is to provide an easy way to train and predict a CNN in TF. It is meant to be used by beginners who just started their data science journey and for people who quickly want to train a decent performing image classifier with minimal effort. Some key features are:
+The goal of this project is to provide an easy way to train and predict a CNN in TF. 
+It is meant to be used by beginners who just started their data science journey and for people who quickly want to train a decent performing image classifier with minimal effort. 
+Some key features are:
 - Augmentation of images of your choice via a few inputs
 - Creating a labels file with minimal effort if no file is provided
 - Choose different preprocessing options
@@ -42,7 +44,12 @@ Make sure your training data and labels file (if you have one) fulfill the follo
 - The folder and file names contain only the following characters: **'a-z A-Z 0-9 _ - + . \*'**
 - The categories in your labels file appear in the same order as the alphabetically orderd folders in 'training_data' --> The category name for the third folder is in the third line in your labels file and the category name for the fith folder is in the fith line in your labels file, etc.
    
-Run the [**train_model.py**](train_model.py) file. 
+Run the [**train_model.py**](train_model.py) file. <br />
+**Note:** By default all info, logs and warnings are deactivated. They can be turned back on if you change the following statement in line 2 in file 
+[**augmentation.py**](python/augmentation.py), [**preprocess.py**](python/preprocess.py), [**model.py**](python/model.py) and [**predict.py**](python/predict.py):
+``` python
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Change this value to 0
+```
 
 ### Augmentation options
 [Image augmentation](https://towardsdatascience.com/image-augmentation-14a0aafd0498) is a technique that increases the amount of training images by changing some aspects of the image and saving it as a separate file.

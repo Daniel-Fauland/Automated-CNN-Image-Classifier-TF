@@ -17,9 +17,12 @@ class Labels():
         if os.path.exists(self.path_data + "/Insert your training data in this directory.txt"):
             os.remove(self.path_data + "/Insert your training data in this directory.txt")
 
-        files = os.listdir(self.labels_path)
+        option = " label options "
+        print("\n" + "*" * 30 + option + "*" * 30)
+
+        files = os.listdir(self.labels_path)  # get all files in 'labels' folder
         if len(files) == 1:
-            print("\n[1]: Use '{}' as labels file".format(files[0]))
+            print("[1]: Use '{}' as labels file".format(files[0]))
             print("[2]: Create label file yourself")
             inp = input("There is one label file in this directory. Type either '1' or '2' (default = '1'): ")
             if inp == "2":
@@ -29,8 +32,6 @@ class Labels():
 
 
         elif len(files) > 1:
-            option = " label options "
-            print("\n" + "*" * 30 + option + "*" * 30)
             for n, i in enumerate(files):
                 print("[{}]: '{}'".format(n + 1, i))
             print("[{}]: Create label file yourself".format(len(files) + 1))
@@ -42,8 +43,6 @@ class Labels():
             file = files[inp - 1]
 
         else:
-            option = " label options "
-            print("\n" + "*" * 30 + option + "*" * 30)
             print("[1]: Create label file yourself\n"
                   "[2]: Exit program")
             inp = input(("No labels file found in this directory. Type either '1' or '2' (default = '1'): "))
@@ -85,9 +84,9 @@ class Labels():
                         "(if left blank the label name will be the folder name): ".format(n + 1, len(data), folder))
 
             if inp == "":
-                labels.append(folder)
+                labels.append(folder)  # label = folder name if input is None
             else:
-                labels.append(inp)
+                labels.append(inp)  # label = input
 
         df = {"label": labels, "folder_name": data}
         df = pd.DataFrame(df)
@@ -99,7 +98,7 @@ class Labels():
 
         file = "labels_generated.csv"
         column_name = "label"
-        df.to_csv(self.labels_path + "/" + file)
+        df.to_csv(self.labels_path + "/" + file)  # save labels file as 'labels_generated.csv'
         return file, column_name
 
     # ============================================================

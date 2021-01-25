@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Ignore all messages
 import sys
 import cv2
 import re
@@ -69,8 +70,9 @@ class Predict():
         for x in range(len(images)):
             images[x] = normalize(images[x], img_normalize, channels)
 
-        images = np.array(images)
-        images = images.reshape(images.shape[0], images.shape[1], images.shape[2], channels)
+        images = np.array(images)  # TF needs numpy array
+        # Reshape images back to its original form of width * height. (Open-cv flips width and height when resizing an image)
+        images = images.reshape(images.shape[0], images.shape[2], images.shape[1], channels)
         return images
 
     # ============================================================

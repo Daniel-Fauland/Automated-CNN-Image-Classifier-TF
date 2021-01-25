@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Turn of all logs, info and warnings
 import sys
 import cv2
 import re
@@ -41,7 +42,8 @@ class Augmentation():
         count_src = 0
         count_img = 0
         error = []
-        for folder in data:
+        sys.stdout.write('\r' + "Augmenting images. Depending on you choice this can take a while.")
+        for folder in data:  # Iterate over each folder in 'training_data'
             f = os.listdir(self.path_data + "/" + folder)
             if settings["os"] == "y":
                 if ".DS_Store" in f:  # Only necessary for MacOS
@@ -49,9 +51,9 @@ class Augmentation():
                     time.sleep(1)
                     f = os.listdir(self.path_data + "/" + folder)
             count_src += len(f)
-            for file in f:
+            for file in f:  # Iterate over each file in each folder
                 try:
-                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)
+                    image = cv2.imread(self.path_data + "/" + folder + "/" + file)  # read file with open_cv
                     if "2" in augmentation_inp:
                         aug_img_rot1 = tf.image.rot90(image, k=1)
                         cv2.imwrite(self.path_data + "/" + folder + "/" + "augmented_rotation1_" + file, np.float32(aug_img_rot1))
@@ -91,7 +93,7 @@ class Augmentation():
                 except:
                     error.append(folder + "/" + file)
             count += 1
-            sys.stdout.write('\r' + "Augmented folder {}/{}".format(count, len(data)))
+            sys.stdout.write('\r' + "Augmented folder {}/{}.".format(count, len(data)))
         sys.stdout.write('\r' + "Successfully created {} augmented images.".format(count_img))
         print("\nIncreased training data from {} images to {} images.\n".format(count_src, count_src + count_img))
         if len(error) > 0:
@@ -99,7 +101,7 @@ class Augmentation():
             print("WARNING: {} file(s) could not be read for some reason. They were skipped instead.".format(len(error)))
             print("These files are:")
             for i in error:
-                print(i)
+                print("'" + i + "'")
             print("=" * 100 + "\n")
         return
 
@@ -125,7 +127,7 @@ class Augmentation():
         count = 0
         count_src = 0
         count_img = 0
-        for folder in data:
+        for folder in data:  # Iterate over each folder in 'training_data'
             f = os.listdir(self.path_data + "/" + folder)
             if settings["os"] == "y":
                 if ".DS_Store" in f:  # Only necessary for MacOS
@@ -133,7 +135,7 @@ class Augmentation():
                     time.sleep(1)
                     f = os.listdir(self.path_data + "/" + folder)
             count_src += len(f)
-            for file in f:
+            for file in f:  # Iterate over each file in each folder
                 image = self.path_data + "/" + folder + "/" + file
                 if "augmented" in image:
                     os.remove(image)
@@ -153,10 +155,6 @@ class Augmentation():
                   "flip left or right\n[6]: Randomly flip up or down\n[7]: Randomly change hue\n[8]: Randomly change saturation "
                   "\n[9]: Randomly change brightness\n[10]: Randomly change contrast")
             augmentation_inp = input("Augment your training data. Type e.g. '2 4 10' for option [2], [4] and [10] (default = '1'): ").split(' ')
-            # if "1" not in augmentation_inp and augmentation_inp != [""]:
-            #     self.initialize(augmentation_inp, settings)
             return augmentation_inp
         else:
             sys.exit(1)
-
-
