@@ -3,6 +3,7 @@ import sys
 import cv2
 import re
 import time
+import shutil
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -72,6 +73,7 @@ class Preprocess():
                 sys.stdout.write('\r' + "Loaded folder {}/{}.".format(count, len(data)))
 
         if len(error) > 0:
+            print()
             print("\n" + "=" * 100)
             print("WARNING: {} file(s) could not be read for some reason. They were skipped instead.".format(len(error)))
             print("These files are:")
@@ -134,12 +136,12 @@ class Preprocess():
             data = sorted_nicely(data)
             if settings["model_save"] == "2":
                 if len(data) > 0:
-                    os.remove(self.checkpoint_dir + "/" + data[0])
+                    shutil.rmtree(self.checkpoint_dir + "/" + data[0])
                     time.sleep(1)
             if settings["model_save"] == "3":
                 if len(data) > 0:
-                    for i in range(len(data)):
-                        os.remove(self.checkpoint_dir + "/" + data[i])
+                    for i in data:
+                        shutil.rmtree(self.checkpoint_dir + "/" + i)
                     time.sleep(1)
 
         if settings["validation"] == "":
